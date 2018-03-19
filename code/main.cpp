@@ -1,8 +1,7 @@
 #include "Header.h"
 
 
-int main()
-{
+int main(){
 	map<string, string> mymap;
 	string x;
 	run(mymap,x);
