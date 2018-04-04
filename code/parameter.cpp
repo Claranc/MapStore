@@ -5,7 +5,7 @@ int choose(string a){
 	string b;
 	for (string::iterator it = a.begin(); it != a.end(); it++){
 		if (*it >= 'a' && *it <= 'z') b.push_back(*it);
-		if (*it == ' ' || it == a.end()-1){
+		if (*it == 9 || *it == ' ' || it == a.end()-1){
 			if (b.size() == 0);
 			else if (b == "create") return 1;
 			else if (b == "update") return 2;
@@ -46,7 +46,7 @@ int get_values(string a, vector<string>& b,int num){
 			}
 			else c.push_back(*it);
 		}
-		else if (*it == ' '){
+		else if (*it == ' ' || *it == 9){
 			if (c.size() == 0);
 			else b.push_back(c);
 			c.clear();
@@ -56,7 +56,7 @@ int get_values(string a, vector<string>& b,int num){
 			if (count == 2 && *(it + 1) == '"') return 1;       
 			for (string::iterator it2 = it + 1; it2 != a.end(); it2++){
 				if (*it2 != '"'){
-					if (*it2 == ' ' && *(it2 - 1) == ' ');
+					if ((*it2 == ' ' || *it2 == 9) && (*(it2 - 1) == ' ' || *(it2-1) == 9));
 					else c.push_back(*it2);
 				}
 				else{
@@ -66,7 +66,7 @@ int get_values(string a, vector<string>& b,int num){
 					}
 					if (flag == 0){
 						string::iterator it6 = c.begin();
-						if (*it6 == ' ') c.erase(it6);
+						if (*it6 == ' ' || *it6 == 9) c.erase(it6);
 						b.push_back(c);
 						return 0;
 					}
