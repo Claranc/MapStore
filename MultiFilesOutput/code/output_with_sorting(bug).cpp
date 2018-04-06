@@ -7,7 +7,7 @@ using namespace std;
 #define SIZE 30
 
 //文件内容排序
-        class OrderlyFiles {
+class OrderlyFiles {
     public:
         int num;
         string key;
