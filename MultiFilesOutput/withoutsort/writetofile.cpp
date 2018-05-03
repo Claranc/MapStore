@@ -4,7 +4,7 @@
 #include <map>
 using namespace std;
 
-#define SIZE 30
+#define SIZE 100000
 
 //输出到多个文件的类
 class MultifulFilesWriting {
@@ -70,4 +70,3 @@ int main(int argc, char* argv[]) {
     A.WriteToFiles();
     return 0;
 }
-    
