@@ -13,20 +13,14 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <stdlib.h>
-
-#include <unistd.h>  
-#include <signal.h>  
-#include <stdlib.h>  
+#include <signal.h>   
 #include <string.h>  
 #include <fcntl.h>  
 #include <sys/stat.h>  
 #include <time.h>  
-#include <stdio.h>  
-#include <fstream>
-#include <iostream>
 using namespace std;
 
-#define SIZE 2
+#define SIZE 10
 
 //daemon
 static bool flag = true;  
@@ -54,8 +48,8 @@ class OrderlyFiles {
         
         //将第i个文件的map传入内存中
         void ExtractDataToMap(int i) {
-            file_key_name = "../ps_00" + to_string(i) + "_key.bin";
-            file_value_name = "../ps_00" + to_string(i) + "_value.bin";
+            file_key_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(i) + "_key.bin";
+            file_value_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(i) + "_value.bin";
             ifstream fin_key(file_key_name, ios::in);
             ifstream fin_value(file_value_name, ios::in);
             fin_key.seekg(0, ios::end);
@@ -95,8 +89,8 @@ class OrderlyFiles {
             int sum = 0;
             int offset = 0;
             int value_length;
-            file_key_name = "../ps_00" + to_string(x) + "_key.bin";
-            file_value_name = "../ps_00" + to_string(x) + "_value.bin";
+            file_key_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(x) + "_key.bin";
+            file_value_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(x) + "_value.bin";
             ofstream fout_key_resort(file_key_name, ios::out);
             ofstream fout_value_resort(file_value_name, ios::out);
             map<string,string>::iterator it = mymap.begin();
@@ -132,8 +126,8 @@ class OrderlyFiles {
             OutputToFiles(num);
         }
 };      
-string OrderlyFiles::file_key_name = "../ps_001_key.bin";
-string OrderlyFiles::file_value_name = "../ps_001_value.bin";
+string OrderlyFiles::file_key_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_key.bin";
+string OrderlyFiles::file_value_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_value.bin";
 
 
 
@@ -154,7 +148,7 @@ class MultifulFilesWriting {
     	int file_exist_num_write() {
 		    int file_num_count = 1;
 		    while(1) {
-		        string file_key = "../ps_00" + to_string(file_num_count) + "_key.bin";
+		        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_count) + "_key.bin";
 		        ifstream fin(file_key, ios::binary | ios::in);
 		        if(!fin.is_open()) {
 		            break;
@@ -171,8 +165,8 @@ class MultifulFilesWriting {
     		file_count = file_exist_num_write();
     		cout << "file_count " << file_count << endl;
             if(file_count) {
-            	ifstream fin_value("../ps_00" + to_string(file_count)+"_value.bin", ios::in);
-            	ifstream fin_key("../ps_00" + to_string(file_count)+"_key.bin", ios::in);
+            	ifstream fin_value("/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count)+"_value.bin", ios::in);
+            	ifstream fin_key("/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count)+"_key.bin", ios::in);
 			    string key;
 			    vector<int> value_offset;
 			    vector<int> length;
@@ -211,20 +205,19 @@ class MultifulFilesWriting {
 			    delete[] key_buff;
             	fin_value.seekg(0,ios::end);
             	offset = fin_value.tellg();
-            	//offset++;
             	if(file_count == 0) {
-	            	string key_file_name = "../ps_001_key.bin";
-	        		string value_file_name = "../ps_001_value.bin";
+	            	string key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_key.bin";
+	        		string value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_value.bin";
 	            }
 	            else {
 	            	if(lastfile.size() == SIZE) {
 	            		offset = 0;
-	            		key_file_name = "../ps_00" + to_string(file_count+1) + "_key.bin";
-	            		value_file_name = "../ps_00" + to_string(file_count+1) + "_value.bin";
+	            		key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count+1) + "_key.bin";
+	            		value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count+1) + "_value.bin";
 	            	}
 	            	else {
-		            	key_file_name = "../ps_00" + to_string(file_count) + "_key.bin";
-		            	value_file_name = "../ps_00" + to_string(file_count) + "_value.bin";
+		            	key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count) + "_key.bin";
+		            	value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count) + "_value.bin";
 		            }
 	        	}
             }           
@@ -232,7 +225,6 @@ class MultifulFilesWriting {
 
 
         void WriteToFiles(string key, string value) {
-            //ifstream fin(fin_file_name, ios::in); 
             if(lastfile.size() == SIZE) lastfile.clear();          
             ofstream fout_key(key_file_name, ios::out | ios::app);
             ofstream fout_value(value_file_name, ios::out | ios::app);
@@ -250,16 +242,13 @@ class MultifulFilesWriting {
             key.clear();
             value.clear();
             if(lastfile.size() == SIZE ) {
-            	//file_num++;
             	int n = file_exist_num_write();
                 fout_key.close();
                 fout_value.close();
                 cout << "success" << endl;
                 SortFiles(n);
-                key_file_name = "../ps_00" + to_string(n+1) + "_key.bin";
-                value_file_name = "../ps_00" + to_string(n+1) + "_value.bin";
-                /*fout_key.open(key_file_name, ios::out);
-                fout_value.open(value_file_name, ios::out);*/
+                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(n+1) + "_key.bin";
+                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(n+1) + "_value.bin";
                 offset = 0;
                 lastfile.clear();
             }
@@ -346,8 +335,8 @@ class MultifulFilesWriting {
 		}
     };
 
-string MultifulFilesWriting::key_file_name = "../ps_001_key.bin";
-string MultifulFilesWriting::value_file_name = "../ps_001_value.bin";
+string MultifulFilesWriting::key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_key.bin";
+string MultifulFilesWriting::value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_value.bin";
 
 
 class ReadKey {
@@ -359,7 +348,7 @@ public:
     	int read_count = 1;
 	    while(1) {
 	        string linestr;
-	        string file_key = "../ps_00" + to_string(read_count) + "_key.bin";
+	        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(read_count) + "_key.bin";
 	        ifstream fin(file_key, ios::binary | ios::in);
 	        if(!fin.is_open()) {
 	            break;
@@ -379,7 +368,7 @@ public:
 	int file_exist_num_sum() {
 		    int file_num_count = 1;
 		    while(1) {
-		        string file_key = "../ps_00" + to_string(file_num_count) + "_key.bin";
+		        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_count) + "_key.bin";
 		        ifstream fin(file_key, ios::binary | ios::in);
 		        if(!fin.is_open()) {
 		            break;
@@ -416,20 +405,20 @@ public:
 	                return "It is not in the files";
 	            if(input_key < file_key_min[i]) {
 	                file_num_key = i;
-	                key_file_name = "../ps_00" + to_string(file_num_key) + "_key.bin";
-	                value_file_name = "../ps_00" + to_string(file_num_key) + "_value.bin";
+	                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
+	                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
 	                break;
 	            }
 	            if(i == file_key_min.size()-1 && input_key >= file_key_min[i]) {
 	                file_num_key = i + 1;
-	                key_file_name = "../ps_00" + to_string(file_num_key) + "_key.bin";
-	                value_file_name = "../ps_00" + to_string(file_num_key) + "_value.bin";
+	                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
+	                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
 	                break;
 	            }
 	        }
 	        cout << "file_num = " << file_num_key << endl;	        
-        	key_file_name = "../ps_00" + to_string(file_num_key) + "_key.bin";
-            value_file_name = "../ps_00" + to_string(file_num_key) + "_value.bin";
+        	key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
+            value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
 	    	ifstream fin_key(key_file_name,ios::binary);
 	    	ifstream fin_value(value_file_name);
 	    	fin_key.seekg(0,ios::end);
@@ -499,7 +488,6 @@ void server_main()
 
     int one=1;
     setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(one));
-
     memset(&server_socket, 0, sizeof(server_socket));
     server_socket.sin_family = AF_INET;
     server_socket.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -582,50 +570,14 @@ void server_main()
     }
 }
 
-void client_main()
-{
-    cout << "This is UDP client\n";
-    int sock;
-    struct sockaddr_in server_socket;
-    struct sockaddr_in client_socket;
-
-    if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-        exit(0);
-
-    int one=1;
-    setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one));
-
-    memset(&server_socket, 0, sizeof(server_socket));
-    server_socket.sin_family = AF_INET;
-    server_socket.sin_addr.s_addr = inet_addr("localhost");
-    server_socket.sin_port = htons(5555);
-    while(1) {
-	    string x;
-	    getline(cin,x);
-	    if("quit" == x) break;
-	    char *buffer = new char[x.size()];
-	    for(int i = 0; i < x.size(); i++) buffer[i] = x [i];
-	    if (sendto(sock, buffer,x.size(), 0, (struct sockaddr *) &server_socket, sizeof(server_socket)) < 0)
-	    {
-	        cout<<"here";
-	        exit(0);
-	    }
-	    sleep(1);
-        socklen_t server_len = sizeof(server_socket);
-        char *rev_client = new char[255];
-        memset(rev_client, 0, sizeof(rev_client));
-        if ((recvfrom(sock, rev_client, 255, 0, (struct sockaddr *) &server_socket, &server_len)) < 0) 
-            exit(0);
-        cout << rev_client << endl << endl;
-	    delete[] buffer;
-	}
-}
 
 void handler(int sig)  
 {  
     printf("I got a signal %d\nI'm quitting.\n", sig);  
     flag = false;  
-}  
+}
+
+//create daemon  
 void create_daemon()  
 {  
     pid_t pid;  
