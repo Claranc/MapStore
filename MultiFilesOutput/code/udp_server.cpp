@@ -340,137 +340,136 @@ string MultifulFilesWriting::value_file_name = "/home/xinjie/MapStore/MultiFiles
 
 
 class ReadKey {
-public:
-    
-    int read_count;
-public: 
-	int file_exist_num_read() {
-    	int read_count = 1;
-	    while(1) {
-	        string linestr;
-	        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(read_count) + "_key.bin";
-	        ifstream fin(file_key, ios::binary | ios::in);
-	        if(!fin.is_open()) {
-	            break;
-	        } 
-	        getline(fin,linestr); 
-	        int a = linestr.find_first_of(' ');
-	        string key = linestr.substr(0,a);
-	        file_key_min.push_back(key);
-	        read_count++;
-	        fin.close();
-	    }
-	    if(file_key_min.size() > 0)file_key_min.pop_back();
-	    --read_count;
-	    return read_count;
-	}
-
-	int file_exist_num_sum() {
-		    int file_num_count = 1;
+	public:
+	    
+	    int read_count;
+	public: 
+		int file_exist_num_read() {
+	    	int read_count = 1;
 		    while(1) {
-		        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_count) + "_key.bin";
+		        string linestr;
+		        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(read_count) + "_key.bin";
 		        ifstream fin(file_key, ios::binary | ios::in);
 		        if(!fin.is_open()) {
 		            break;
 		        } 
-		        file_num_count++;
+		        getline(fin,linestr); 
+		        int a = linestr.find_first_of(' ');
+		        string key = linestr.substr(0,a);
+		        file_key_min.push_back(key);
+		        read_count++;
 		        fin.close();
 		    }
-		    file_num_count--;
-		    return file_num_count;
+		    if(file_key_min.size() > 0)file_key_min.pop_back();
+		    --read_count;
+		    return read_count;
 		}
 
-    string read_key(string input_key) {
-    	string key;
-	    vector<int> value_offset;
-	    vector<int> length;
-	    string value;
-	    int offset = 0;
-	    string line;
-	    int value_length = 0;
-	    char c;
-	    int m,n;
-    	cout << lastfile.size() << "size" << endl;
-    	int file_num_count = file_exist_num_sum();
-    	map<string, string>::iterator it = lastfile.find(input_key);
-    	if(it != lastfile.end()) return it->second;
-    	else {
-	    	cout << "file_num_count = " << file_num_count << endl;
-	        int file_num_key;
-	        string key_file_name;
-	        string value_file_name;
-	        cout << "f_size" << file_key_min.size() << endl;
-	        for(int i = 0; i < file_key_min.size(); i++) {
-	            if(input_key < file_key_min[0])
-	                return "It is not in the files";
-	            if(input_key < file_key_min[i]) {
-	                file_num_key = i;
-	                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
-	                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
-	                break;
-	            }
-	            if(i == file_key_min.size()-1 && input_key >= file_key_min[i]) {
-	                file_num_key = i + 1;
-	                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
-	                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
-	                break;
-	            }
-	        }
-	        cout << "file_num = " << file_num_key << endl;	        
-        	key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
-            value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
-	    	ifstream fin_key(key_file_name,ios::binary);
-	    	ifstream fin_value(value_file_name);
-	    	fin_key.seekg(0,ios::end);
-	    	n = fin_key.tellg();
-		    char *key_buff = new char[n];
-		    memset(key_buff,0,sizeof(key_buff));
-		    fin_key.seekg(0,ios::beg);
-		    fin_key.read((char*)key_buff,n);
-	        int flag_exist = 0;
-		    for(int k = 0; k < n; k++) {
-		        if(key_buff[k] != ' ') {
-		            key.push_back(key_buff[k]);
-		        }
-		        else {
-		            if(key == input_key) {
-		                offset = *((int*)&key_buff[++k]);
-		                k += 4;
-		                value_length = *((int*)&key_buff[k]);
-		                k += 3;
-		                key.clear();
-	                    flag_exist = 1;
-		                continue;
+		int file_exist_num_sum() {
+			    int file_num_count = 1;
+			    while(1) {
+			        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_count) + "_key.bin";
+			        ifstream fin(file_key, ios::binary | ios::in);
+			        if(!fin.is_open()) {
+			            break;
+			        } 
+			        file_num_count++;
+			        fin.close();
+			    }
+			    file_num_count--;
+			    return file_num_count;
+			}
+
+	    string read_key(string input_key) {
+	    	string key;
+		    vector<int> value_offset;
+		    vector<int> length;
+		    string value;
+		    int offset = 0;
+		    string line;
+		    int value_length = 0;
+		    char c;
+		    int m,n;
+	    	cout << lastfile.size() << "size" << endl;
+	    	int file_num_count = file_exist_num_sum();
+	    	map<string, string>::iterator it = lastfile.find(input_key);
+	    	if(it != lastfile.end()) return it->second;
+	    	else {
+		    	cout << "file_num_count = " << file_num_count << endl;
+		        int file_num_key;
+		        string key_file_name;
+		        string value_file_name;
+		        cout << "f_size" << file_key_min.size() << endl;
+		        for(int i = 0; i < file_key_min.size(); i++) {
+		            if(input_key < file_key_min[0])
+		                return "It is not in the files";
+		            if(input_key < file_key_min[i]) {
+		                file_num_key = i;
+		                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
+		                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
+		                break;
 		            }
-		            else {
-		                k += 8;
-		                key.clear();
-		                continue;
+		            if(i == file_key_min.size()-1 && input_key >= file_key_min[i]) {
+		                file_num_key = i + 1;
+		                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
+		                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
+		                break;
 		            }
 		        }
+		        cout << "file_num = " << file_num_key << endl;	        
+	        	key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
+	            value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
+		    	ifstream fin_key(key_file_name,ios::binary);
+		    	ifstream fin_value(value_file_name);
+		    	fin_key.seekg(0,ios::end);
+		    	n = fin_key.tellg();
+			    char *key_buff = new char[n];
+			    memset(key_buff,0,sizeof(key_buff));
+			    fin_key.seekg(0,ios::beg);
+			    fin_key.read((char*)key_buff,n);
+		        int flag_exist = 0;
+			    for(int k = 0; k < n; k++) {
+			        if(key_buff[k] != ' ') {
+			            key.push_back(key_buff[k]);
+			        }
+			        else {
+			            if(key == input_key) {
+			                offset = *((int*)&key_buff[++k]);
+			                k += 4;
+			                value_length = *((int*)&key_buff[k]);
+			                k += 3;
+			                key.clear();
+		                    flag_exist = 1;
+			                continue;
+			            }
+			            else {
+			                k += 8;
+			                key.clear();
+			                continue;
+			            }
+			        }
+			    }
+		        if(flag_exist == 1) {               
+				    fin_value.seekg(offset,ios::beg);
+			        char *kbuff = new char[value_length];
+			        memset(kbuff,0,sizeof(kbuff));
+			        fin_value.read(kbuff,value_length);
+			        for(int i = 0; i < value_length; i++) value.push_back(kbuff[i]);
+			        delete[] kbuff;
+			    	string x = value;
+			    	value.clear();
+			        return x;
+		        }
+		        delete[] key_buff;
+		        fin_key.close();
+		        fin_value.close();
+	    	
 		    }
-	        if(flag_exist == 1) {               
-			    fin_value.seekg(offset,ios::beg);
-		        char *kbuff = new char[value_length];
-		        memset(kbuff,0,sizeof(kbuff));
-		        fin_value.read(kbuff,value_length);
-		        for(int i = 0; i < value_length; i++) value.push_back(kbuff[i]);
-		        delete[] kbuff;
-		    	string x = value;
-		    	value.clear();
-		        return x;
-	        }
-	        delete[] key_buff;
-	        fin_key.close();
-	        fin_value.close();
-    	
-	    }
-        return "It is not in the files";
-	}
-};
+	        return "It is not in the files";
+		}
+	};
    
-void server_main()
-{
+void server_main() {
     cout << "This is UDP server\n";
     int sock;
     struct sockaddr_in server_socket;
@@ -571,49 +570,41 @@ void server_main()
 }
 
 
-void handler(int sig)  
-{  
+void handler(int sig)  {  
     printf("I got a signal %d\nI'm quitting.\n", sig);  
     flag = false;  
 }
 
 //create daemon  
-void create_daemon()  
-{  
+void create_daemon() {  
     pid_t pid;  
     pid = fork();  
       
-    if(pid == -1)  
-    {  
+    if(pid == -1) {  
         printf("fork error\n");  
         exit(1);  
     }  
-    else if(pid)  
-    {  
+    else if(pid) {  
         exit(0);  
     }  
   
-    if(-1 == setsid())  
-    {  
+    if(-1 == setsid()) {  
         printf("setsid error\n");  
         exit(1);  
     }  
   
     pid = fork();  
-    if(pid == -1)  
-    {  
+    if(pid == -1) {  
         printf("fork error\n");  
         exit(1);  
     }  
-    else if(pid)  
-    {  
+    else if(pid) {  
         exit(0);  
     }  
   
     chdir("/home/xinjie/MapStore/MultiFilesOutput/code");  
     int i;  
-    for(i = 0; i < 3; ++i)  
-    {  
+    for(i = 0; i < 3; ++i) {  
         close(i);  
     }  
     umask(0);  
@@ -630,8 +621,7 @@ int main(int argc, char* argv[]) {
     act.sa_handler = handler;  
     sigemptyset(&act.sa_mask);  
     act.sa_flags = 0;  
-    if(sigaction(SIGQUIT, &act, NULL))  
-    {  
+    if(sigaction(SIGQUIT, &act, NULL)) {  
         printf("sigaction error.\n");  
         exit(0);  
     }  
