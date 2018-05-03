@@ -1,0 +1,25 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          test
+# Required-Start:    $all
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+### END INIT INFO
+
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+case "$1" in
+start)
+echo -n "Starting test: "
+/home/xinjie/MapStore/MultiFilesOutput/code/udp_server
+echo -n "start is OK"
+  ;;
+stop)
+echo -n "Shutting stop test: "
+pkill udp_server
+echo -n "stop is OK"
+  ;;
+esac
+exit
