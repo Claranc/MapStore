@@ -21,6 +21,7 @@
 using namespace std;
 
 #define SIZE 10
+string file_prefix = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00";
 
 //daemon
 static bool flag = true;  
@@ -48,8 +49,8 @@ class OrderlyFiles {
         
         //将第i个文件的map传入内存中
         void ExtractDataToMap(int i) {
-            file_key_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(i) + "_key.bin";
-            file_value_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(i) + "_value.bin";
+            file_key_name = file_prefix + to_string(i) + "_key.bin";
+            file_value_name = file_prefix + to_string(i) + "_value.bin";
             ifstream fin_key(file_key_name, ios::in);
             ifstream fin_value(file_value_name, ios::in);
             fin_key.seekg(0, ios::end);
@@ -89,8 +90,8 @@ class OrderlyFiles {
             int sum = 0;
             int offset = 0;
             int value_length;
-            file_key_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(x) + "_key.bin";
-            file_value_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(x) + "_value.bin";
+            file_key_name = file_prefix + to_string(x) + "_key.bin";
+            file_value_name = file_prefix + to_string(x) + "_value.bin";
             ofstream fout_key_resort(file_key_name, ios::out);
             ofstream fout_value_resort(file_value_name, ios::out);
             map<string,string>::iterator it = mymap.begin();
@@ -126,8 +127,8 @@ class OrderlyFiles {
             OutputToFiles(num);
         }
 };      
-string OrderlyFiles::file_key_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_key.bin";
-string OrderlyFiles::file_value_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_value.bin";
+string OrderlyFiles::file_key_name = file_prefix + "1_key.bin";
+string OrderlyFiles::file_value_name = file_prefix + "1_value.bin";
 
 
 
@@ -148,7 +149,7 @@ class MultifulFilesWriting {
     	int file_exist_num_write() {
 		    int file_num_count = 1;
 		    while(1) {
-		        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_count) + "_key.bin";
+		        string file_key = file_prefix + to_string(file_num_count) + "_key.bin";
 		        ifstream fin(file_key, ios::binary | ios::in);
 		        if(!fin.is_open()) {
 		            break;
@@ -165,8 +166,8 @@ class MultifulFilesWriting {
     		file_count = file_exist_num_write();
     		cout << "file_count " << file_count << endl;
             if(file_count) {
-            	ifstream fin_value("/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count)+"_value.bin", ios::in);
-            	ifstream fin_key("/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count)+"_key.bin", ios::in);
+            	ifstream fin_value(file_prefix + to_string(file_count)+"_value.bin", ios::in);
+            	ifstream fin_key(file_prefix + to_string(file_count)+"_key.bin", ios::in);
 			    string key;
 			    vector<int> value_offset;
 			    vector<int> length;
@@ -206,18 +207,18 @@ class MultifulFilesWriting {
             	fin_value.seekg(0,ios::end);
             	offset = fin_value.tellg();
             	if(file_count == 0) {
-	            	string key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_key.bin";
-	        		string value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_value.bin";
+	            	string key_file_name = file_prefix + "1_key.bin";
+	        		string value_file_name = file_prefix + "1_value.bin";
 	            }
 	            else {
 	            	if(lastfile.size() == SIZE) {
 	            		offset = 0;
-	            		key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count+1) + "_key.bin";
-	            		value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count+1) + "_value.bin";
+	            		key_file_name = file_prefix + to_string(file_count+1) + "_key.bin";
+	            		value_file_name = file_prefix + to_string(file_count+1) + "_value.bin";
 	            	}
 	            	else {
-		            	key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count) + "_key.bin";
-		            	value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_count) + "_value.bin";
+		            	key_file_name = file_prefix + to_string(file_count) + "_key.bin";
+		            	value_file_name = file_prefix + to_string(file_count) + "_value.bin";
 		            }
 	        	}
             }           
@@ -247,8 +248,8 @@ class MultifulFilesWriting {
                 fout_value.close();
                 cout << "success" << endl;
                 SortFiles(n);
-                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(n+1) + "_key.bin";
-                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(n+1) + "_value.bin";
+                key_file_name = file_prefix + to_string(n+1) + "_key.bin";
+                value_file_name = file_prefix + to_string(n+1) + "_value.bin";
                 offset = 0;
                 lastfile.clear();
             }
@@ -335,8 +336,8 @@ class MultifulFilesWriting {
 		}
     };
 
-string MultifulFilesWriting::key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_key.bin";
-string MultifulFilesWriting::value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_001_value.bin";
+string MultifulFilesWriting::key_file_name = file_prefix + "1_key.bin";
+string MultifulFilesWriting::value_file_name = file_prefix + "1_value.bin";
 
 
 class ReadKey {
@@ -348,7 +349,7 @@ class ReadKey {
 	    	int read_count = 1;
 		    while(1) {
 		        string linestr;
-		        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(read_count) + "_key.bin";
+		        string file_key = file_prefix + to_string(read_count) + "_key.bin";
 		        ifstream fin(file_key, ios::binary | ios::in);
 		        if(!fin.is_open()) {
 		            break;
@@ -368,7 +369,7 @@ class ReadKey {
 		int file_exist_num_sum() {
 			    int file_num_count = 1;
 			    while(1) {
-			        string file_key = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_count) + "_key.bin";
+			        string file_key = file_prefix + to_string(file_num_count) + "_key.bin";
 			        ifstream fin(file_key, ios::binary | ios::in);
 			        if(!fin.is_open()) {
 			            break;
@@ -405,20 +406,20 @@ class ReadKey {
 		                return "It is not in the files";
 		            if(input_key < file_key_min[i]) {
 		                file_num_key = i;
-		                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
-		                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
+		                key_file_name = file_prefix + to_string(file_num_key) + "_key.bin";
+		                value_file_name = file_prefix + to_string(file_num_key) + "_value.bin";
 		                break;
 		            }
 		            if(i == file_key_min.size()-1 && input_key >= file_key_min[i]) {
 		                file_num_key = i + 1;
-		                key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
-		                value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
+		                key_file_name = file_prefix + to_string(file_num_key) + "_key.bin";
+		                value_file_name = file_prefix + to_string(file_num_key) + "_value.bin";
 		                break;
 		            }
 		        }
 		        cout << "file_num = " << file_num_key << endl;	        
-	        	key_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_key.bin";
-	            value_file_name = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00" + to_string(file_num_key) + "_value.bin";
+	        	key_file_name = file_prefix + to_string(file_num_key) + "_key.bin";
+	            value_file_name = file_prefix + to_string(file_num_key) + "_value.bin";
 		    	ifstream fin_key(key_file_name,ios::binary);
 		    	ifstream fin_value(value_file_name);
 		    	fin_key.seekg(0,ios::end);
