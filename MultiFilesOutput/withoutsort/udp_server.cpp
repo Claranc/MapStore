@@ -20,7 +20,7 @@
 #include <time.h>  
 using namespace std;
 
-#define SIZE 10
+#define SIZE 2
 string file_prefix = "/home/xinjie/MapStore/MultiFilesOutput/data/ps_00";
 
 //daemon
@@ -28,106 +28,7 @@ static bool flag = true;
 void create_daemon();  
 void handler(int);  
 
-static vector<string> file_key_min;
 map<string,string> lastfile;
-
-//文件内容排序
-class OrderlyFiles {
-	private:
-        int num;
-        string key;
-        string value;
-        map<string,string> mymap;
-        int offset,value_length;
-        static string file_key_name;
-        static string file_value_name;
-    public:
-        OrderlyFiles(int l) {
-            num = l;
-        }
-        
-        //将第i个文件的map传入内存中
-        void ExtractDataToMap(int i) {
-            file_key_name = file_prefix + to_string(i) + "_key.bin";
-            file_value_name = file_prefix + to_string(i) + "_value.bin";
-            ifstream fin_key(file_key_name, ios::in);
-            ifstream fin_value(file_value_name, ios::in);
-            fin_key.seekg(0, ios::end);
-            int n = fin_key.tellg();
-            char *kbuff = new char[n];
-            fin_key.seekg(0, ios::beg);
-            fin_key.read((char*)kbuff,n);
-            int j = 0;
-            while(j < n) {
-                if(kbuff[j] != ' ') key.push_back(kbuff[j++]);
-                else {
-                    offset = *((int*)&kbuff[++j]);
-                    j += 4;
-                    value_length = *((int*)&kbuff[j]);
-                    fin_value.seekg(offset, ios::beg);
-                    char *vbuff = new char[value_length];
-                    fin_value.read(vbuff,value_length);
-                    for(int k = 0; k < value_length; k++) value.push_back(vbuff[k]);
-                    if(key.size() != 0 && value.size() != 0) { 
-                        mymap.insert(pair<string,string>(key,value));
-                    }
-                    key.clear();
-                    value.clear();
-                    delete[] vbuff;
-                    j+=4;
-                }
-            }
-            fin_key.close();
-            fin_value.close();
-            delete[] kbuff;
-        }
-        
-        //将内存中的一部分map输出到文件x中
-        int OutputToFiles(int x) {
-        	if(mymap.size() == 0) return 0;
-            int sum = 0;
-            int offset = 0;
-            int value_length;
-            file_key_name = file_prefix + to_string(x) + "_key.bin";
-            file_value_name = file_prefix + to_string(x) + "_value.bin";
-            ofstream fout_key_resort(file_key_name, ios::out);
-            ofstream fout_value_resort(file_value_name, ios::out);
-            map<string,string>::iterator it = mymap.begin();
-            if(file_key_min.size() < x ) {
-                file_key_min.push_back(it->first);
-            }
-            else file_key_min[x-1] = it->first;
-            for(; it != mymap.end(); it++) {
-                fout_key_resort << it->first << " ";
-                value_length = it->second.size();
-                fout_key_resort.write((char*)&offset,sizeof(int));
-                fout_key_resort.write((char*)&value_length,sizeof(int));
-                fout_value_resort << it->second << endl;
-                offset+=(value_length+sizeof(char));
-                sum++;
-                if(sum == SIZE) {
-                    it++;
-                    break;
-                }
-            }
-            fout_key_resort.close();
-            fout_value_resort.close();
-            mymap.erase(mymap.begin(), it);
-            return sum;
-        }
-        
-        void SortFiles() {
-            ExtractDataToMap(num);
-            for(int p = 1; p <= num - 1; p++) {
-                ExtractDataToMap(p);
-            	OutputToFiles(p);
-            }
-            OutputToFiles(num);
-        }
-};      
-string OrderlyFiles::file_key_name = file_prefix + "1_key.bin";
-string OrderlyFiles::file_value_name = file_prefix + "1_value.bin";
-
 
 
 //输出到多个文件的类
@@ -137,9 +38,11 @@ class MultifulFilesWriting {
         string key;
         string value;
         int value_length;
+        int file_num = 1;
         static string key_file_name;
         static string value_file_name;
         int offset = 0;
+        int file_count;
 
     public:
     	int file_exist_num_write() {
@@ -159,7 +62,7 @@ class MultifulFilesWriting {
 
 
     	void check_file() {
-    		int file_count = file_exist_num_write();
+    		file_count = file_exist_num_write();
     		cout << "file_count " << file_count << endl;
             if(file_count) {
             	ifstream fin_value(file_prefix + to_string(file_count)+"_value.bin", ios::in);
@@ -242,7 +145,7 @@ class MultifulFilesWriting {
             	int n = file_exist_num_write();
                 fout_key.close();
                 fout_value.close();
-                SortFiles(n);
+                cout << "success" << endl;
                 key_file_name = file_prefix + to_string(n+1) + "_key.bin";
                 value_file_name = file_prefix + to_string(n+1) + "_value.bin";
                 offset = 0;
@@ -252,11 +155,6 @@ class MultifulFilesWriting {
             fout_value.close();
         }
 
-        void SortFiles(int x) {
-            OrderlyFiles* rec = new OrderlyFiles(x);
-            rec->SortFiles();
-            delete rec;
-        }
 
         int choose(string a){
 			string b;
@@ -334,30 +232,19 @@ class MultifulFilesWriting {
 string MultifulFilesWriting::key_file_name = file_prefix + "1_key.bin";
 string MultifulFilesWriting::value_file_name = file_prefix + "1_value.bin";
 
-//return value of input key
-class ReadKey {
-	public: 
-		int file_exist_num_read() {
-	    	int read_count = 1;
-		    while(1) {
-		        string linestr;
-		        string file_key = file_prefix + to_string(read_count) + "_key.bin";
-		        ifstream fin(file_key, ios::binary | ios::in);
-		        if(!fin.is_open()) {
-		            break;
-		        } 
-		        getline(fin,linestr); 
-		        int a = linestr.find_first_of(' ');
-		        string key = linestr.substr(0,a);
-		        file_key_min.push_back(key);
-		        read_count++;
-		        fin.close();
-		    }
-		    if(file_key_min.size() > 0)file_key_min.pop_back();
-		    --read_count;
-		    return read_count;
-		}
 
+class ReadKey {
+	private:
+	    string key;
+	    vector<int> value_offset;
+	    vector<int> length;
+	    string value;
+	    int offset = 0;
+	    string line;
+	    int value_length = 0;
+	    char c;
+	    int m,n;
+	public:
 		int file_exist_num_sum() {
 			    int file_num_count = 1;
 			    while(1) {
@@ -373,94 +260,72 @@ class ReadKey {
 			    return file_num_count;
 		}
 
+
 	    string read_key(string input_key) {
-	    	string key;
-		    vector<int> value_offset;
-		    vector<int> length;
-		    string value;
-		    int offset = 0;
-		    string line;
-		    int value_length = 0;
-		    char c;
-		    int m,n;
-	    	cout << lastfile.size() << "size" << endl;
-	    	int file_num_count = file_exist_num_sum();
-	    	map<string, string>::iterator it = lastfile.find(input_key);
+	        int file_num = 1;
+	        map<string, string>::iterator it = lastfile.find(input_key);
 	    	if(it != lastfile.end()) return it->second;
 	    	else {
-		    	cout << "file_num_count = " << file_num_count << endl;
-		        int file_num_key;
-		        string key_file_name;
-		        string value_file_name;
-		        cout << "f_size" << file_key_min.size() << endl;
-		        for(int i = 0; i < file_key_min.size(); i++) {
-		            if(input_key < file_key_min[0])
-		                return "It is not in the files";
-		            if(input_key < file_key_min[i]) {
-		                file_num_key = i;
-		                key_file_name = file_prefix + to_string(file_num_key) + "_key.bin";
-		                value_file_name = file_prefix + to_string(file_num_key) + "_value.bin";
-		                break;
-		            }
-		            if(i == file_key_min.size()-1 && input_key >= file_key_min[i]) {
-		                file_num_key = i + 1;
-		                key_file_name = file_prefix + to_string(file_num_key) + "_key.bin";
-		                value_file_name = file_prefix + to_string(file_num_key) + "_value.bin";
-		                break;
-		            }
+		        string key_file_name = file_prefix + "1_key.bin";
+		        string value_file_name = file_prefix + "1_value.bin";
+		        while(1) {
+		        	ifstream fin_key(key_file_name,ios::binary);
+		        	ifstream fin_value(value_file_name);
+		        	if(fin_key.is_open()) {
+		        		fin_key.seekg(0,ios::end);
+		        		n = fin_key.tellg();
+		                fin_key.seekg(0,ios::beg);
+			    		char *key_buff = new char[n];
+			    		fin_key.read((char*)key_buff,n);
+			    		int flag_exist = 0;
+					    for(int k = 0; k < n; k++) {
+					        if(key_buff[k] != ' ') {
+					            key.push_back(key_buff[k]);
+					        }
+					        else {
+					            if(key == input_key) {
+					                offset = *((int*)&key_buff[++k]);
+					                k += 4;
+					                value_length = *((int*)&key_buff[k]);
+					                k += 3;
+					                key.clear();
+				                    flag_exist = 1;
+					                continue;
+					            }
+					            else {
+					                k += 8;
+					                key.clear();
+					                continue;
+					            }
+					        }
+					    }
+				        if(flag_exist == 1) {               
+		                    fin_value.seekg(offset,ios::beg);
+					        char *kbuff = new char[value_length];
+					        fin_value.read(kbuff,value_length);
+					        for(int i = 0; i < value_length; i++) value.push_back(kbuff[i]);
+					        string x = value;
+					    	value.clear();
+					        return x;
+			        	}
+			        	key.clear();
+			        	value.clear();
+			        	file_num++;
+			        	delete[] key_buff;
+			        	fin_key.close();
+			        	fin_value.close();
+			        	key_file_name = file_prefix + to_string(file_num) + "_key.bin";
+			        	value_file_name = file_prefix + to_string(file_num) + "_value.bin";
+		        	}
+		        	else {
+		        		break;
+		        	}
+		        	
 		        }
-		        cout << "file_num = " << file_num_key << endl;	        
-	        	key_file_name = file_prefix + to_string(file_num_key) + "_key.bin";
-	            value_file_name = file_prefix + to_string(file_num_key) + "_value.bin";
-		    	ifstream fin_key(key_file_name,ios::binary);
-		    	ifstream fin_value(value_file_name);
-		    	fin_key.seekg(0,ios::end);
-		    	n = fin_key.tellg();
-			    char *key_buff = new char[n];
-			    memset(key_buff,0,sizeof(key_buff));
-			    fin_key.seekg(0,ios::beg);
-			    fin_key.read((char*)key_buff,n);
-		        int flag_exist = 0;
-			    for(int k = 0; k < n; k++) {
-			        if(key_buff[k] != ' ') {
-			            key.push_back(key_buff[k]);
-			        }
-			        else {
-			            if(key == input_key) {
-			                offset = *((int*)&key_buff[++k]);
-			                k += 4;
-			                value_length = *((int*)&key_buff[k]);
-			                k += 3;
-			                key.clear();
-		                    flag_exist = 1;
-			                continue;
-			            }
-			            else {
-			                k += 8;
-			                key.clear();
-			                continue;
-			            }
-			        }
-			    }
-		        if(flag_exist == 1) {               
-				    fin_value.seekg(offset,ios::beg);
-			        char *kbuff = new char[value_length];
-			        memset(kbuff,0,sizeof(kbuff));
-			        fin_value.read(kbuff,value_length);
-			        for(int i = 0; i < value_length; i++) value.push_back(kbuff[i]);
-			        delete[] kbuff;
-			    	string x = value;
-			    	value.clear();
-			        return x;
-		        }
-		        delete[] key_buff;
-		        fin_key.close();
-		        fin_value.close();
-	    	
 		    }
 	        return "It is not in the files";
 		}
-	};
+};
    
 void server_main() {
     cout << "This is UDP server\n";
@@ -469,7 +334,7 @@ void server_main() {
     struct sockaddr_in client_socket;
     MultifulFilesWriting A;
     ReadKey B;
-    B.file_exist_num_read();
+    //B.file_exist_num_read();
     A.check_file();
 	vector<string> vals;
 	string x;
@@ -595,7 +460,7 @@ void create_daemon() {
         exit(0);  
     }  
   
-    chdir("/home/xinjie/MapStore/MultiFilesOutput/code");  
+    chdir("/home/xinjie/MapStore/MultiFilesOutput/withoutsort");  
     int i;  
     for(i = 0; i < 3; ++i) {  
         close(i);  
