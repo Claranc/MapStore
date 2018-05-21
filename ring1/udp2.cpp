@@ -20,7 +20,7 @@ struct server_info {
 class Ring {
 private:
     vector<struct server_info> server_list;
-	vector<int> server_state;
+    vector<int> server_state;
 public:
     void CheckAlive(int sock);
     void SplitString(const string& s, vector<string>& v, const string& c);
