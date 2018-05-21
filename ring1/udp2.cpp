@@ -11,22 +11,33 @@
 #include <thread>
 using namespace std;
 
-vector<struct server_info> server_list;
-vector<int> server_state;
 
 struct server_info {
-	string ip_addr;
-	int udp_port;
+    string ip_addr;
+    int udp_port;
 };
 
-void CheckAlive(int sock) {
+class Ring {
+private:
+    vector<struct server_info> server_list;
+	vector<int> server_state;
+public:
+    void CheckAlive(int sock);
+    void SplitString(const string& s, vector<string>& v, const string& c);
+    void ProcessData(string x, sockaddr_in client_socket, int received,int sock);
+    void server_main(int udp_port, int argc, const char *address, const char *port);
+};
+
+
+
+
+void Ring::CheckAlive(int sock) {
 	while(1) {
-    	int i = 0;
-        int len =  server_list.size();
-    	while(i < 4) {
+		int i = 0;
+		int len =  server_list.size();
+		while(i < 4) {
     		if(server_list.size() > 1 ) {
-                //for(int j = 1; j < server_list.size(); j++) {
-                for(int j = 1; j < 2; j++) {
+				for(int j = 1; j < 2; j++) {
 					struct sockaddr_in *q = new sockaddr_in;
 					memset(q,0,sizeof(sockaddr_in));
 					const char *addr = server_list[j].ip_addr.c_str();
@@ -36,39 +47,32 @@ void CheckAlive(int sock) {
 					char messages[] = "I am still alive\0";
 					if (sendto(sock, messages,strlen(messages), 0, (struct sockaddr *) q, sizeof(sockaddr_in)) < 0) {
 					    cout<<"I am dead";
-	                    exit(0);
-		            }
-		            delete q;
-		            q = NULL;
-	            }
+					    exit(0);
+					}
+					delete q;
+					q = NULL;
+					}
         	}
-        	i++;
-        	sleep(1);
-    	}
-
-    	// for(int k=0;k<server_list.size();k++) cout << server_list[k].udp_port << " ";
-    	// cout << endl;
-        if(server_state.size() > 1) {
-            vector<int> server_down;
-            if(len != server_state.size()) continue;
-            for(int i = len-1; i < len; i++) {
-                if(server_state[i] == 0) {
-                    cout << server_list[i].ip_addr << " " << server_list[i].udp_port << " is dead" << endl;
-                    server_down.push_back(i);
+			i++;
+			sleep(1);
+		}
+		if(server_state.size() > 1) {
+			vector<int> server_down;
+			if(len != server_state.size()) continue;
+			for(int i = len-1; i < len; i++) {
+				if(server_state[i] == 0) {
+					cout << server_list[i].ip_addr << " " << server_list[i].udp_port << " is dead" << endl;
+					server_down.push_back(i);
 					struct sockaddr_in *q = new sockaddr_in;
 					memset(q,0,sizeof(sockaddr_in));
 					const char *addr = server_list[1].ip_addr.c_str();
 					q->sin_addr.s_addr = inet_addr(addr);
 					q->sin_port = htons(server_list[1].udp_port);
-					//string ip_address = inet_ntoa(client_socket.sin_addr);
-					//string add_message = "modify_" +  ip_address + "_" + to_string(ntohs(client_socket.sin_port));
-					//cout << add_message << endl;
 					string x_send = "dead" +  server_list[i].ip_addr + "_" + to_string(server_list[i].udp_port);
 					const char *messages = x_send.c_str();
-					//char messages[] = "I am still alive\0";
 					if (sendto(sock, messages,strlen(messages), 0, (struct sockaddr *) q, sizeof(sockaddr_in)) < 0) {
-					    cout<<"I am dead";
-					    exit(0);
+						cout<<"I am dead";
+						exit(0);
 					}
 					delete q;
 					q = NULL;
@@ -80,37 +84,37 @@ void CheckAlive(int sock) {
             }
             server_down.clear();
             for(int i = 0; i < server_state.size(); i++) server_state[i] = 0;
-        }       
-    }
+		}	       
+	}
 }
 
-void SplitString(const string& s, vector<string>& v, const string& c) {
-    string::size_type pos1, pos2;
-    pos2 = s.find(c);
-    pos1 = 0;
-    while(string::npos != pos2) {
-        v.push_back(s.substr(pos1, pos2-pos1));        
-        pos1 = pos2 + c.size();
-        pos2 = s.find(c, pos1);
-    }
-    if(pos1 != s.length())
-        v.push_back(s.substr(pos1));
+void Ring::SplitString(const string& s, vector<string>& v, const string& c) {
+	string::size_type pos1, pos2;
+	pos2 = s.find(c);
+	pos1 = 0;
+	while(string::npos != pos2) {
+		v.push_back(s.substr(pos1, pos2-pos1));        
+		pos1 = pos2 + c.size();
+		pos2 = s.find(c, pos1);
+	}
+	if(pos1 != s.length())
+	    v.push_back(s.substr(pos1));
 }
  
 
-void ProcessData(string x, sockaddr_in client_socket, int received,int sock) {
-    if(x == "hello") {
-        if(server_list.size() > 1) {
-            string send_data = "info";
-            int k = server_list.size();
-            for(int i = 1; i < k; i++) {
-                send_data = send_data + server_list[i].ip_addr + " " + to_string(server_list[i].udp_port) + "~";
-            }
+void Ring::ProcessData(string x, sockaddr_in client_socket, int received,int sock) {
+	if(x == "hello") {
+		if(server_list.size() > 1) {
+			string send_data = "info";
+			int k = server_list.size();
+			for(int i = 1; i < k; i++) {
+			    send_data = send_data + server_list[i].ip_addr + " " + to_string(server_list[i].udp_port) + "~";
+			}
 			const char *send_mess = send_data.c_str();
-            if (sendto(sock, send_mess,strlen(send_mess), 0, (struct sockaddr *) &client_socket, sizeof(sockaddr_in)) < 0) {
-	            cout<<"I am dead";
-	            exit(0);
-            }
+			if (sendto(sock, send_mess,strlen(send_mess), 0, (struct sockaddr *) &client_socket, sizeof(sockaddr_in)) < 0) {
+			    cout<<"I am dead";
+			    exit(0);
+			}
 			struct sockaddr_in *q = new sockaddr_in;
 			memset(q,0,sizeof(sockaddr_in));
 			const char *addr = server_list[1].ip_addr.c_str();
@@ -122,12 +126,12 @@ void ProcessData(string x, sockaddr_in client_socket, int received,int sock) {
 			const char *messages = add_message.c_str();
 			//char messages[] = "I am still alive\0";
 			if (sendto(sock, messages,strlen(messages), 0, (struct sockaddr *) q, sizeof(sockaddr_in)) < 0) {
-			    cout<<"I am dead";
-			    exit(0);
+				cout<<"I am dead";
+				exit(0);
 			}
 			delete q;
 			q = NULL;
-        } 
+		} 
 		struct server_info *r = new server_info;
 		memset(r,0,sizeof(server_info));
 		r->ip_addr = inet_ntoa(client_socket.sin_addr);
@@ -138,16 +142,16 @@ void ProcessData(string x, sockaddr_in client_socket, int received,int sock) {
 		r = NULL;
 		server_state.push_back(0);      
     }
-    else if(x == "I am still alive") {
-        int flag = 0;
-        for(int i = 1; i < server_list.size(); i++) {
-            if(ntohs(client_socket.sin_port) == server_list[i].udp_port) {
-                if(inet_ntoa(client_socket.sin_addr) == server_list[i].ip_addr) {
-                    flag = 1;
-                    server_state[i]++;
-                }
-            }
-        }
+	else if(x == "I am still alive") {
+	    int flag = 0;
+	    for(int i = 1; i < server_list.size(); i++) {
+	        if(ntohs(client_socket.sin_port) == server_list[i].udp_port) {
+	            if(inet_ntoa(client_socket.sin_addr) == server_list[i].ip_addr) {
+	                flag = 1;
+	                server_state[i]++;
+	            }
+	        }
+	    }
         if(flag == 0) {
             struct server_info *t = new server_info;
             memset(t, 0, sizeof(server_info));
@@ -317,7 +321,7 @@ void ProcessData(string x, sockaddr_in client_socket, int received,int sock) {
 }
 
 
-void server_main(int udp_port, int argc, const char *address, const char *port) {
+void Ring::server_main(int udp_port, int argc, const char *address, const char *port) {
 	server_state.push_back(0);
 	struct server_info *p = new server_info;
 	memset(p,0,sizeof(server_info));
@@ -356,7 +360,7 @@ void server_main(int udp_port, int argc, const char *address, const char *port) 
     }  
 	char buffer[255];
 	int received;
-	thread third(CheckAlive,sock);
+	thread third(&Ring::CheckAlive, this, sock);
 	third.detach();
     while (1) {
 		socklen_t client_len = sizeof(client_socket);
@@ -364,13 +368,14 @@ void server_main(int udp_port, int argc, const char *address, const char *port) 
 		    exit(0);
 		buffer[received] = '\0';
 		string x = buffer;
-		thread second(ProcessData,x,client_socket, received, sock);
+		thread second(&Ring::ProcessData, this, x,client_socket, received, sock);
 		second.detach();
         
     }
 }
 
 int main(int argc, char * argv[]) {
-    server_main(atoi(argv[1]), argc, argv[2], argv[3]);
+    Ring A;
+    A.server_main(atoi(argv[1]), argc, argv[2], argv[3]);
     return 0;
 }
