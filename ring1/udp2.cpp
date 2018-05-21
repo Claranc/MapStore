@@ -75,7 +75,7 @@ void Ring::CheckAlive(int sock) {
 						exit(0);
 					}
 					delete q;
-					q = NULL;
+				    q = NULL;
 				}
             }
             for (int i = 0; i < server_down.size(); ++i) {
