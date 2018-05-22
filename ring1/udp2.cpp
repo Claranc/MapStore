@@ -31,6 +31,7 @@ public:
 
 
 
+<<<<<<< HEAD
 void Ring::CheckAlive(int sock, int n) {
     while(1) {
         int i = 0;
@@ -79,6 +80,54 @@ void Ring::CheckAlive(int sock, int n) {
                     delete q;
                     q = NULL;
                 }
+=======
+void Ring::CheckAlive(int sock) {
+	while(1) {
+		int i = 0;
+		int len =  server_list.size();
+		while(i < 4) {
+    		if(server_list.size() > 1 ) {
+				for(int j = 1; j < 2; j++) {
+					struct sockaddr_in *q = new sockaddr_in;
+					memset(q,0,sizeof(sockaddr_in));
+					const char *addr = server_list[j].ip_addr.c_str();
+					q->sin_addr.s_addr = inet_addr(addr);
+					q->sin_port = htons(server_list[j].udp_port);
+					//cout << "I send to " << server_list[j].udp_port << endl;
+					char messages[] = "I am still alive\0";
+					if (sendto(sock, messages,strlen(messages), 0, (struct sockaddr *) q, sizeof(sockaddr_in)) < 0) {
+					    cout<<"I am dead";
+					    exit(0);
+					}
+					delete q;
+					q = NULL;
+					}
+        	}
+			i++;
+			sleep(1);
+		}
+		if(server_state.size() > 1) {
+			vector<int> server_down;
+			if(len != server_state.size()) continue;
+			for(int i = len-1; i < len; i++) {
+				if(server_state[i] == 0) {
+					cout << server_list[i].ip_addr << " " << server_list[i].udp_port << " is dead" << endl;
+					server_down.push_back(i);
+					struct sockaddr_in *q = new sockaddr_in;
+					memset(q,0,sizeof(sockaddr_in));
+					const char *addr = server_list[1].ip_addr.c_str();
+					q->sin_addr.s_addr = inet_addr(addr);
+					q->sin_port = htons(server_list[1].udp_port);
+					string x_send = "dead" +  server_list[i].ip_addr + "_" + to_string(server_list[i].udp_port);
+					const char *messages = x_send.c_str();
+					if (sendto(sock, messages,strlen(messages), 0, (struct sockaddr *) q, sizeof(sockaddr_in)) < 0) {
+						cout<<"I am dead";
+						exit(0);
+					}
+					delete q;
+				    q = NULL;
+				}
+>>>>>>> bbee44464fe3fa411f3d609d6e7dab2bcfabb2c6
             }
             for (int i = 0; i < server_down.size(); ++i) {
                 server_list.erase(server_list.begin()+server_down[i]);
