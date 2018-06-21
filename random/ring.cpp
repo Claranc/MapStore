@@ -12,7 +12,7 @@ string getTime() {
     return tmp;
 }
  
-//环形检测类
+//GOSSIP检测类
 class Ring {
 private:
     vector<struct server_info> server_list;  //存储节点信息
@@ -89,7 +89,7 @@ void Ring::CheckAlive(int sock) {
             sleep(2);
             count++;
         }
-        //没发送10次，检测是否有节点down掉
+        //每发送10次，检测是否有节点down掉
         if(size > 1) {
             for(int m = size-1; m > 0; m--) {
                 //获取节点更新时间
