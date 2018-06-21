@@ -1,6 +1,6 @@
 #include "ring.h"
 
-//每个节点每次给它后面NUM个节点发送心跳包
+//每个节点每次随机给NUM个节点发送自己的信息
 #define NUM 3
 
 //获取系统当前时间
@@ -171,7 +171,7 @@ void Ring::ProcessData(string x, sockaddr_in client_socket, int received,int soc
             r = NULL;
         }   
     }
-    //接收到心跳包
+    //接收到心跳信息
     else if(x.substr(0,strlen("info")) == "info") {
         //如果为新节点则加入其信息
         int flag = 0;
