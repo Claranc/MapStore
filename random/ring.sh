@@ -1,4 +1,5 @@
 #!/bin/bash
+g++ -std=c++11 -pthread ring.cpp -o server_start
 count=0
 udp_port=20000
 cat /dev/null > ../data/log.txt
