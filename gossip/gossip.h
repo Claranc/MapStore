@@ -12,10 +12,3 @@
 #include <algorithm>
 #include <ctime>
 using namespace std;
-
-//定义节点信息结构体
-struct server_info {
-    string ip_addr;
-    int udp_port;
-    string time_version;
-};
