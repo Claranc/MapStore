@@ -218,6 +218,7 @@ void Ring::process_info(string x, sockaddr_in client_socket, int received,int so
     strptime(time2_1, "%Y/%m/%d %H:%M:%S", &tm_2);
     tm_2.tm_isdst = -1; 
     t_2  = mktime(&tm_2);
+    //时间相差过大表明网络延迟高，该包丢弃
     if(t_1 - t_2 < 3) {
         //如果为新节点则加入其信息
         int flag = 0;
@@ -255,6 +256,7 @@ void Ring::process_info(string x, sockaddr_in client_socket, int received,int so
                 const char *tmp = info_each[1].c_str();
                 if(atoi(tmp) == server_list[j].udp_port) {
                     flag1 = 1;
+                    //如果自己存储该节点的版本过低，则更新
                     if(server_list[j].time_version < info_each[2]) {
                         server_list[j].time_version = info_each[2];
                         //cout << server_list[j].udp_port << "update version: " << server_list[j].time_version << endl;
